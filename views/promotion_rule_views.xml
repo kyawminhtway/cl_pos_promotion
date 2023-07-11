@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_promotion_rule_form" model="ir.ui.view">
+        <field name="name">promotion.rule.form</field>
+        <field name="model">promotion.rule</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <span class="oe_edit_only">Name</span>
+                        <h3><field name="name"/></h3>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="type" widget="radio"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="price_rule" 
+                               attrs="{'invisible': [('type', 'not in', ['buy_more_than_x_amount', 'buy_more_than_x_amount_from_categories', 'buy_more_than_x_amount_from_products'])],
+                                       'required': [('type', 'in', ['buy_more_than_x_amount', 'buy_more_than_x_amount_from_categories', 'buy_more_than_x_amount_from_products'])]}"/>
+                        <field name="min_amt" 
+                               attrs="{'invisible': [('type', 'not in', ['buy_more_than_x_amount', 'buy_more_than_x_amount_from_categories', 'buy_more_than_x_amount_from_products'])],
+                                       'required': [('type', 'in', ['buy_more_than_x_amount', 'buy_more_than_x_amount_from_categories', 'buy_more_than_x_amount_from_products'])]}"/>
+                        <field name="min_qty" 
+                               attrs="{'invisible': [('type', 'not in', ['buy_more_than_x_qty', 'buy_more_than_x_qty_from_categories', 'buy_more_than_x_qty_from_products'])],
+                                       'required': [('type', 'in', ['buy_more_than_x_qty', 'buy_more_than_x_qty_from_categories', 'buy_more_than_x_qty_from_products'])]}"/>
+                    </group>
+                    <notebook>
+                        <page name="categories" 
+                            string="Categories" 
+                            attrs="{'invisible': [('type', 'not in', ['buy_more_than_x_amount_from_categories', 'buy_more_than_x_qty_from_categories'])]}">
+                            <field name="category_ids"/>
+                        </page>
+                        <page name="products" 
+                            string="Products" 
+                            attrs="{'invisible': [('type', 'not in', ['buy_more_than_x_amount_from_products', 'buy_more_than_x_qty_from_products'])]}">
+                            <field name="product_ids"/>
+                        </page>
+                        <page name="combo_line" 
+                            string="Combo Products" 
+                            attrs="{'invisible': [('type', '!=', 'buy_combo_products')]}">
+                            <field name="combo_line_ids">
+                                <tree editable="bottom">
+                                    <field name="based_on"/>
+                                    <field name="product_ids" 
+                                           widget="many2many_tags" 
+                                           attrs="{'readonly': [('based_on', '!=', 'product')],
+                                                   'required': [('based_on', '=', 'product')]}"/>
+                                    <field name="category_ids" 
+                                           widget="many2many_tags" 
+                                           attrs="{'readonly': [('based_on', '!=', 'category')],
+                                                   'required': [('based_on', '=', 'category')]}"/>
+                                    <field name="qty"/>
+                                    <field name="rule_id" invisible="1"/>
+                                </tree>
+                                <form>
+                                    <sheet>
+                                        <group> 
+                                            <group>
+                                                <field name="based_on"/>
+                                                <field name="category_ids" 
+                                                       widget="many2many_tags"/>
+                                                <field name="product_ids" 
+                                                       widget="many2many_tags"/>
+                                                <field name="qty"/>
+                                                <field name="rule_id" invisible="1"/>
+                                            </group>
+                                        </group>
+                                    </sheet>
+                                </form>
+                            </field>
+                        </page>
+                        <page name="note" string="Note">
+                            <field name="note"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <record id="view_promotion_rule_tree" model="ir.ui.view">
+        <field name="name">promotion.rule.tree</field>
+        <field name="model">promotion.rule</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="type"/>
+            </tree>
+        </field>
+    </record>
+    <record id="action_promotion_rule" model="ir.actions.act_window">
+        <field name="name">Promotion Rule</field>
+        <field name="res_model">promotion.rule</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new promotion rule here.
+            </p>
+            <p>
+                You'll be able to manage your promotion rules here.
+            </p>
+        </field>
+    </record>
+</odoo>

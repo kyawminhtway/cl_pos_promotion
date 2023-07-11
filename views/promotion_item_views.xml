@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_promotion_item_form" model="ir.ui.view">
+        <field name="name">promotion.item.form</field>
+        <field name="model">promotion.item</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <span class="oe_edit_only">Name</span>
+                        <h3><field name="name"/></h3>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="type" widget="radio"/>
+                            <field name="discount_rule" 
+                                   widget="radio" 
+                                   attrs="{'invisible': [('type', 'not in', ['fixed_discount', 'percent_discount'])],
+                                           'required': [('type', 'in', ['fixed_discount', 'percent_discount'])]}"/>
+                            <field name="price_rule"
+                                   string="Calculate Discount On" 
+                                   attrs="{'invisible': [('type', '!=', 'percent_discount')],
+                                           'required': [('type', '=', 'percent_discount')]}"/>
+                            <field name="discount"
+                                   attrs="{'invisible': [('type', 'not in', ['fixed_discount', 'percent_discount'])],
+                                           'required': [('type', 'in', ['fixed_discount', 'percent_discount'])]}"/>
+                            <field name="product_id"
+                                   string="Discount Product" 
+                                   attrs="{'invisible': [('type', 'not in', ['fixed_discount', 'percent_discount'])],
+                                           'required': [('type', 'in', ['fixed_discount', 'percent_discount'])]}"/>
+                            <field name="item_rule" 
+                                   attrs="{'invisible': [('type', 'not in', ['fixed_discount', 'free_product'])],
+                                           'required': [('type', 'in', ['fixed_discount', 'free_product'])]}"/>
+                            <field name="max_occurrence" 
+                                   attrs="{'invisible': ['|', ('type', 'not in', ['fixed_discount', 'free_product']), ('item_rule', '!=', 'max_occurrence')],
+                                           'required': [('type', 'in', ['fixed_discount', 'free_product']), ('item_rule', '=', 'max_occurrence')]}"/>
+                            <field name="max_discount" 
+                                   string="Discount Capped at"
+                                   attrs="{'invisible': [('type', 'not in', ['fixed_discount', 'percent_discount'])],
+                                           'required': [('type', 'in', ['fixed_discount', 'percent_discount'])]}"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="categories" 
+                              string="Categories" 
+                              attrs="{'invisible': ['|', ('type', 'not in', ['fixed_discount', 'percent_discount']), ('discount_rule', '!=', 'category')]}">
+                            <field name="category_ids"/>
+                        </page>
+                        <page name="products" 
+                              string="Products" 
+                              attrs="{'invisible': ['|', ('type', 'not in', ['fixed_discount', 'percent_discount']), ('discount_rule', '!=', 'product')]}">
+                            <field name="product_ids"/>
+                        </page>
+                        <page name="free_products" 
+                              string="Free Products" 
+                              attrs="{'invisible': [('type', '!=', 'free_product')]}">
+                            <field name="free_product_ids">
+                                <tree editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="qty"/>
+                                    <field name="item_id" invisible="1"/>
+                                </tree>
+                                <form>
+                                    <sheet>
+                                        <group> 
+                                            <group>
+                                                <field name="product_id"/>
+                                                <field name="qty"/>
+                                                <field name="item_id" invisible="1"/>
+                                            </group>
+                                        </group>
+                                    </sheet>
+                                </form>
+                            </field>
+                        </page>
+                        <page name="note" string="Note">
+                            <field name="note"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <record id="view_promotion_item_tree" model="ir.ui.view">
+        <field name="name">promotion.item.tree</field>
+        <field name="model">promotion.item</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="type"/>
+            </tree>
+        </field>
+    </record>
+    <record id="action_promotion_item" model="ir.actions.act_window">
+        <field name="name">Promotion Item</field>
+        <field name="res_model">promotion.item</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new promotion item here.
+            </p>
+            <p>
+                You'll be able to manage your promotion items here.
+            </p>
+        </field>
+    </record>
+</odoo>

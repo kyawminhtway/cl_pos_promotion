@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_promotion_rule_all,Promotion Rule Access for All,model_promotion_rule,base.group_user,1,1,1,1
+access_promotion_item_all,Promotion Item Access for All,model_promotion_item,base.group_user,1,1,1,1
+access_promotion_program_all,Promotion Program Access for All,model_promotion_program,base.group_user,1,1,1,1
+access_promotion_combo_line_all,Promotion Combo Line Access for All,model_promotion_combo_line,base.group_user,1,1,1,1
+access_promotion_free_product_all,Promotion Free Product Access for All,model_promotion_free_product,base.group_user,1,1,1,1

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_promotion_program_form" model="ir.ui.view">
+        <field name="name">promotion.program.form</field>
+        <field name="model">promotion.program</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <span class="oe_edit_only">Name</span>
+                        <h3><field name="name"/></h3>
+                    </div>
+                    <group string="Promotion Period">
+                        <group>
+                            <field name="date_from"/>
+                        </group>
+                        <group>
+                            <field name="date_to"/>
+                        </group>
+                    </group>
+                    <group string="Promotion Rule &amp; Item">
+                        <group>
+                            <field name="rule_id"/>
+                        </group>
+                        <group>
+                            <field name="item_id"/>
+                        </group>
+                        <group string="Can be merged with other Discounts" 
+                               attrs="{'invisible': [('item_type', 'not in', ['fixed_discount', 'percent_discount'])]}">
+                            <field name="can_be_merged" string="Merge"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="available_shops" string="Available At">
+                            <field name="config_ids"/>
+                        </page>
+                        <page name="available_customers" string="Specific Customers">
+                            <field name="partner_ids"/>
+                        </page>
+                        <page name="note" string="Note">
+                            <field name="note"/>
+                        </page>
+                        <page invisible="1">
+                            <field name="active"/>
+                            <field name="item_type"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <record id="view_promotion_program_tree" model="ir.ui.view">
+        <field name="name">promotion.program.tree</field>
+        <field name="model">promotion.program</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+                <field name="rule_id"/>
+                <field name="item_id"/>
+                <field name="active" invisible="1"/>
+            </tree>
+        </field>
+    </record>
+    <record id="action_promotion_program" model="ir.actions.act_window">
+        <field name="name">Promotion Program</field>
+        <field name="res_model">promotion.program</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new promotion program here.
+            </p>
+            <p>
+                You'll be able to manage your promotion programs here.
+            </p>
+        </field>
+    </record>
+</odoo>
