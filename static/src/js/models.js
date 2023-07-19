@@ -47,15 +47,15 @@ var PromotionProgramOrder = (Order) => class extends Order{
     }
     set_orderline_options(orderline, options) {
         super.set_orderline_options(...arguments);
-        if(options.promotion_ids !== undefined){
-            orderline.promotion_ids = options.promotion_ids;
+        if(options.cl_promotions !== undefined){
+            orderline.cl_promotions = options.cl_promotions;
         }
     }
     remove_cl_programs(){
         var orderlines = Object.assign({}, this.orderlines);
         for(var index in orderlines){
             var orderline = orderlines[index];
-            if(orderline.promotion_ids && orderline.promotion_ids.length > 0){
+            if(orderline.cl_promotions && orderline.cl_promotions.length > 0){
                 orderline.set_quantity('remove');
             }
         }
@@ -69,7 +69,7 @@ var PromotionProgramOrder = (Order) => class extends Order{
             var program = applicable_programs[program_id];
             var item = item_by_id[this.pos.cl_promotion.programs.by_id[program_id].item_id[0]];
             var occurrence = program.rule_occurrence;
-            occurrence = item.max_occurrence > 0 && occurrence > item.max_occurrence ? item.max_occurrence : occurrence;
+            occurrence = item.item_rule === 'max_occurrence' && item.max_occurrence > 0 && occurrence > item.max_occurrence ? item.max_occurrence : occurrence;
             if(TYPES_DISCOUNT.includes(item.type)){
                 if(item.type === 'fixed_discount'){
                     var price = item.discount * occurrence;
@@ -95,7 +95,6 @@ var PromotionProgramOrder = (Order) => class extends Order{
                         price: price * -1,
                         lst_price: price * -1,
                         extras: {price_automatically_set: true},
-                        promotion_ids: [program_id],
                         promotion_product: true,
                         cl_promotions: [{ id: program_id, description: this.pos.cl_promotion.programs.by_id[program_id].name }]
                     })
@@ -110,7 +109,6 @@ var PromotionProgramOrder = (Order) => class extends Order{
                         price: 0,
                         lst_price: 0,
                         extras: {price_automatically_set: true},
-                        promotion_ids: [program_id],
                         promotion_product: true,
                         cl_promotions: [{ id: program_id, description: this.pos.cl_promotion.programs.by_id[program_id].name }]
                     })   
@@ -123,9 +121,8 @@ var PromotionProgramOrder = (Order) => class extends Order{
                 price: merged_discount * -1,
                 lst_price: merged_discount * -1,
                 extras: {price_automatically_set: true},
-                promotion_ids: [program_id],
                 promotion_product: true,
-                cl_promotions: [{ id: program_id, description: this.pos.cl_promotion.programs.by_id[program_id].name }]
+                cl_promotions: merged_promotions
             })
         }
     }
@@ -168,13 +165,25 @@ var PromotionProgramOrder = (Order) => class extends Order{
                 }
             }
         }
+        var partner_id = this.get_partner() && this.get_partner().id || false;
+        for(program_id in applicable_programs){
+            var program = cl_promotion.programs.by_id[program_id];
+            if(program.partner_ids && program.partner_ids.length > 0 && !program.partner_ids.includes(partner_id)){
+                delete applicable_programs[program_id];
+            }
+        }
         this.cl_applicable_programs = applicable_programs;
+        if(Object.keys(this.cl_applicable_programs).length > 0){
+            $('.cl-apply-promotion-button').addClass('apply-promotion-button-applicable');
+        }else{
+            $('.cl-apply-promotion-button').removeClass('apply-promotion-button-applicable');
+        }
     }
     prepare_cl_promotions_utilities(){
         var amount = {overall: {tax_exclusive: 0, tax_inclusive: 0, discount_inclusive: 0}, by_product: {}, by_category: {}};
         var quantity = {overall: 0, by_product: {}, by_category: {}};
         for(var orderline of this.orderlines){
-            if(orderline.promotion_ids.length > 0){
+            if(orderline.cl_promotions.length > 0){
                 continue;
             }
             var product_id = orderline.product.id;
@@ -262,7 +271,7 @@ var PromotionProgramOrder = (Order) => class extends Order{
             if(category_ids.includes(category_id)){
                 value += type === 'amount' ? utilities.amount.by_category[category_id][rule.price_rule] : utilities.quantity.by_category[category_id];
             }else if(product_ids.includes(product_id)){
-                value += type === 'amount' ? utilities.amount.by_product[category_id][rule.price_rule] : utilities.quantity.by_product[category_id];
+                value += type === 'amount' ? utilities.amount.by_product[product_id][rule.price_rule] : utilities.quantity.by_product[product_id];
             }
         }
         return this.prepare_occurrence(value, min_value);
@@ -293,24 +302,24 @@ var PromotionProgramOrder = (Order) => class extends Order{
 var PromotionProgramOrderline = (Orderline) => class extends Orderline{
     constructor(obj, options){
         super(...arguments);
-        this.promotion_ids = options.promotion_ids || []; 
+        this.cl_promotions = options.cl_promotions || []; 
     }
     init_from_JSON(json){
         super.init_from_JSON(...arguments);
-        this.promotion_ids = json.promotion_ids || [];
+        this.cl_promotions = json.cl_promotions || [];
     }
     export_as_JSON(){
         var res = super.export_as_JSON(...arguments);
         return {
             ...res,
-            promotion_ids: this.promotion_ids,
+            cl_promotions: this.cl_promotions,
         };
     };
     export_for_printing(){
         var res = super.export_for_printing(...arguments);
         return {
             ...res,
-            promotion_ids: this.promotion_ids,
+            cl_promotions: this.cl_promotions,
         };
     };
     can_be_merged_with(orderline){
@@ -319,22 +328,28 @@ var PromotionProgramOrderline = (Orderline) => class extends Orderline{
     }
     set_quantity(quantity, keep_price){
         var res = super.set_quantity(...arguments);
-        if(!this.promotion_ids || this.promotion_ids.length <= 0){
+        if(!this.cl_promotions || this.cl_promotions.length <= 0){
             this.order.compute_cl_promotions();
         }
         return res;
     }
     set_unit_price(price){
         super.set_unit_price(...arguments);
-        this.order.compute_cl_promotions();
+        if(!this.cl_promotions || this.cl_promotions.length <= 0){
+            this.order.compute_cl_promotions();
+        }
     }
     set_discount(discount){
         super.set_discount(...arguments);
-        this.order.compute_cl_promotions();
+        if(!this.cl_promotions || this.cl_promotions.length <= 0){
+            this.order.compute_cl_promotions();
+        }
     }
     set_lst_price(price){
         super.set_lst_price(...arguments);
-        this.order.compute_cl_promotions();
+        if(!this.cl_promotions || this.cl_promotions.length <= 0){
+            this.order.compute_cl_promotions();
+        }
     }
 };
 

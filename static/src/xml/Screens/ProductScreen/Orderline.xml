@@ -2,10 +2,13 @@
 <templates id="template" xml:space="preserve">
     <t t-name="Orderline" t-inherit="point_of_sale.Orderline" t-inherit-mode="extension" owl="1">
         <xpath expr="//t[@t-if='customerNote']" position="after">
-            <t t-if="props.line.promotion_ids &amp;&amp; props.line.promotion_ids.length > 0">
-                <li class="info">
-                    <img t-attf-src="data:image/png;base64,{{ env.pos.cl_promotion.gift_icon }}" alt="Gift Icon" width="18px" height="18px"/>
-                </li>
+            <t t-if="props.line.cl_promotions &amp;&amp; props.line.cl_promotions.length > 0">
+                <t t-foreach="props.line.cl_promotions" t-as="cl_promotion" t-key="cl_promotion.id">
+                    <li class="info" t-key="cl_promotion.id">
+                        <img t-attf-src="data:image/png;base64,{{ env.pos.cl_promotion.gift_icon }}" alt="Gift Icon" width="18px" height="18px"/>
+                        <span style="margin-left: 5px; color: #9c0667"><t t-esc="cl_promotion.description"/></span>
+                    </li>
+                </t>
             </t>
         </xpath>
     </t>
