@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="SetApplyPromotionButton" owl="1">
+        <div class="control-button cl-apply-promotion-button">
+            <i class="fa fa-gift" role="img" aria-label="Apply Promotion" title="Apply Promotion" />
+            Apply Promotion
+        </div>
+    </t>
+
+</templates>

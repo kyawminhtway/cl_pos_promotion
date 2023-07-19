@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="SelectPromotionProgramsPopup" owl="1">
+        <Draggable>
+            <div class="select-promotions popup">
+                <div class="selection scrollable-y">
+                    <table style="width: 100%">
+                        <thead>
+                            <tr>
+                                <th style="width: 10%">
+                                    <t t-if="this.hasSelectedAll">
+                                        <input t-on-click="this.removeAll" type="checkbox" checked=""/>
+                                    </t>
+                                    <t t-else="">
+                                        <input t-on-click="this.selectAll" type="checkbox"/>
+                                    </t>
+                                </th>
+                                <th style="width: 90%">Program</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="this.props.items" t-as="item" t-key="item.id">
+                                <t t-if="this.state.selected_programs.includes(item.id)">
+                                    <tr t-on-click="(e) => this.removeItem(item.id)">
+                                        <td><input type="checkbox" checked=""/></td>
+                                        <td class="promotion-title"><t t-esc="item.name"/></td>
+                                    </tr>
+                                </t>
+                                <t t-else="">
+                                    <tr t-on-click="(e) => this.selectItem(item.id)">
+                                        <td><input type="checkbox"/></td>
+                                        <td class="promotion-title"><t t-esc="item.name"/></td>
+                                    </tr>
+                                </t>
+                            </t>
+                        </tbody>
+                    </table>
+                </div>
+                <footer class="footer">
+                    <div class="button confirm" t-on-click="confirm">
+                        Confirm
+                    </div>
+                    <div class="button cancel" t-on-click="cancel">
+                        Cancel
+                    </div>
+                </footer>
+            </div>
+        </Draggable>
+    </t>
+
+</templates>

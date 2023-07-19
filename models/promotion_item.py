@@ -30,6 +30,11 @@ class PromotionItem(models.Model):
     note = fields.Text('Note')
     program_ids = fields.One2many('promotion.program', 'item_id', 'Promotion Programs')
 
+    def get_discount_products(self):
+        promotion_program_domain = self.env['pos.session']._loader_params_promotion_program()['search_params']['domain']
+        products = self.env['promotion.program'].search(promotion_program_domain).item_id.product_id.filtered_domain([('available_in_pos', '!=', True)])
+        return products
+
 
 class PromotionFreeProduct(models.Model):
 

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="Orderline" t-inherit="point_of_sale.Orderline" t-inherit-mode="extension" owl="1">
+        <xpath expr="//t[@t-if='customerNote']" position="after">
+            <t t-if="props.line.promotion_ids &amp;&amp; props.line.promotion_ids.length > 0">
+                <li class="info">
+                    <img t-attf-src="data:image/png;base64,{{ env.pos.cl_promotion.gift_icon }}" alt="Gift Icon" width="18px" height="18px"/>
+                </li>
+            </t>
+        </xpath>
+    </t>
+</templates>

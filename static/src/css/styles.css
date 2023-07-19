@@ -1,0 +1,19 @@
+.apply-promotion-button-applicable {
+    color: #ffffff !important;
+    background-color: #07ab43 !important;
+}
+.select-promotions input{
+    width: auto !important;
+}
+.select-promotions .promotion-title{
+    text-align: left;
+    padding: 8px;
+    font-size: 14px;
+}
+.select-promotions table thead tr{
+    color: #ffffff;
+    background: #714B67;
+}
+.select-promotions table tbody tr{
+    border: 1px solid #cecece;
+}

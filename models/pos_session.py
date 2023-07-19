@@ -1,11 +1,17 @@
+import base64
 from odoo import api, models, fields
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
+from odoo.osv.expression import OR
+from odoo.modules.module import get_resource_path
 
 
 class PosSession(models.Model):
 
     _inherit = 'pos.session'
+
+    def _pos_data_process(self, loaded_data):
+        gift_icon = open(get_resource_path('cl_pos_promotion', 'static/images/gift.png'), 'rb').read()
+        loaded_data['cl_gift_icon'] = base64.b64encode(gift_icon)
+        return super()._pos_data_process(loaded_data)
 
     @api.model
     def _pos_ui_models_to_load(self):
@@ -51,13 +57,21 @@ class PosSession(models.Model):
                                      grouped_options=params['grouped_params'],
                                      ids_options=params['ids_params'])
         return data
+    
+    def _loader_params_product_product(self):
+        res = super()._loader_params_product_product()
+        domain = res['search_params']['domain']
+        discount_products = self.env['promotion.item'].get_discount_products()
+        if discount_products:
+            res['search_params']['domain'] = OR([domain, [('id', 'in', discount_products.ids)]])
+        return res
 
     def _loader_params_promotion_program(self):
         today = fields.Date.context_today(self)
         domain = [
             '&', 
             '|', 
-            ('config_ids', 'in', 1), 
+            ('config_ids', 'in', self.config_id.ids), 
             ('config_ids', '=', False), 
             '|', 
             '|', 

@@ -22,7 +22,9 @@ are also there.
     ],
     'assets': {
         'point_of_sale.assets': [
+            'cl_pos_promotion/static/src/css/**/*',
             'cl_pos_promotion/static/src/js/**/*',
+            'cl_pos_promotion/static/src/xml/**/*',
         ],
     },
     'installable': True,

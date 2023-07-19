@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="OrderlineDetails" t-inherit="point_of_sale.OrderlineDetails" t-inherit-mode="extension" owl="1">
+        <xpath expr="//li[hasclass('orderline')]//t[last()]" position="after">
+            <t t-if="line.promotion_ids &amp;&amp; line.promotion_ids.length > 0">
+                <li class="info">
+                    <img t-attf-src="data:image/png;base64,{{ env.pos.cl_promotion.gift_icon }}" alt="Gift Icon" width="18px" height="18px"/>
+                </li>
+            </t>
+        </xpath>
+    </t>
+
+</templates>
