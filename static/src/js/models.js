@@ -24,20 +24,6 @@ var PromotionProgramPosGlobalState = (PosGlobalState) => class extends PosGlobal
 };
 
 var PromotionProgramOrder = (Order) => class extends Order{
-    constructor(obj, options) {
-        super(...arguments);
-    }
-    init_from_JSON(json) {
-        super.init_from_JSON(...arguments);
-    }
-    export_as_JSON(){
-        var res = super.export_as_JSON(...arguments);
-        return res;
-    }
-    export_for_printing(){
-        var res = super.export_for_printing(...arguments);
-        return res;
-    }
     add_product(product, options){
         var res = super.add_product(...arguments);
         if(!options.promotion_product){
@@ -72,6 +58,10 @@ var PromotionProgramOrder = (Order) => class extends Order{
             occurrence = item.item_rule === 'max_occurrence' && item.max_occurrence > 0 && occurrence > item.max_occurrence ? item.max_occurrence : occurrence;
             if(TYPES_DISCOUNT.includes(item.type)){
                 if(item.type === 'fixed_discount'){
+                    if(item.discount_rule !== 'order'){
+                        occurrence = program.item.quantity;
+                        occurrence = item.item_rule === 'max_occurrence' && item.max_occurrence > 0 && occurrence > item.max_occurrence ? item.max_occurrence : occurrence;
+                    }
                     var price = item.discount * occurrence;
                 }else{
                     if(item.discount_rule !== 'order'){
@@ -86,7 +76,8 @@ var PromotionProgramOrder = (Order) => class extends Order{
                     merged_discount += price;
                     merged_promotions.push({
                         id: program_id, 
-                        description: this.pos.cl_promotion.programs.by_id[program_id].name
+                        description: this.pos.cl_promotion.programs.by_id[program_id].name,
+                        amount: price,
                     });
                     merged_discount_product_id = merged_discount_product_id === false ? item.product_id[0] : merged_discount_product_id;
                 }else{
@@ -148,7 +139,6 @@ var PromotionProgramOrder = (Order) => class extends Order{
             }
         }
         for(var item_id of cl_promotion.items.ids){
-            var applicable = false;
             var item = cl_promotion.items.by_id[item_id];
             if(TYPES_DISCOUNT.includes(item.type) && item.discount_rule !== 'order'){
                 var { amount, quantity } = this.check_discount_applicable(item);
@@ -158,10 +148,10 @@ var PromotionProgramOrder = (Order) => class extends Order{
                     }
                     continue;
                 }
-                if(applicable_programs[program_id] !== undefined){
-                    applicable_programs[program_id].item = {amount, quantity};
-                }else{
-                    applicable_programs[program_id] = {item: {amount, quantity}}
+                for(var program_id of item.program_ids){
+                    if(applicable_programs[program_id] !== undefined){
+                        applicable_programs[program_id].item = {amount, quantity};
+                    }
                 }
             }
         }
@@ -173,7 +163,7 @@ var PromotionProgramOrder = (Order) => class extends Order{
             }
         }
         this.cl_applicable_programs = applicable_programs;
-        if(Object.keys(this.cl_applicable_programs).length > 0){
+        if(Object.keys(applicable_programs).length > 0){
             $('.cl-apply-promotion-button').addClass('apply-promotion-button-applicable');
         }else{
             $('.cl-apply-promotion-button').removeClass('apply-promotion-button-applicable');
@@ -302,7 +292,9 @@ var PromotionProgramOrder = (Order) => class extends Order{
 var PromotionProgramOrderline = (Orderline) => class extends Orderline{
     constructor(obj, options){
         super(...arguments);
-        this.cl_promotions = options.cl_promotions || []; 
+        if(!options.json){
+            this.cl_promotions = options.cl_promotions || [];
+        }
     }
     init_from_JSON(json){
         super.init_from_JSON(...arguments);
@@ -323,8 +315,10 @@ var PromotionProgramOrderline = (Orderline) => class extends Orderline{
         };
     };
     can_be_merged_with(orderline){
-        var res = super.can_be_merged_with(...arguments);
-        return res;
+        if(orderline.cl_promotions.length > 0 || this.cl_promotions.length > 0){
+            return false;
+        }
+        return super.can_be_merged_with(...arguments);
     }
     set_quantity(quantity, keep_price){
         var res = super.set_quantity(...arguments);

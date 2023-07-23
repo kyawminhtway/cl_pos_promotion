@@ -18,6 +18,7 @@ are also there.
         'views/promotion_program_views.xml',
         'views/promotion_rule_views.xml',
         'views/promotion_item_views.xml',
+        'views/pos_order_views.xml',
         'views/menuitems.xml',
     ],
     'assets': {
@@ -27,6 +28,7 @@ are also there.
             'cl_pos_promotion/static/src/xml/**/*',
         ],
     },
+    'images': ['static/description/banner.png'],
     'installable': True,
     'application': True,
     'license': 'OPL-1',
